@@ -42,6 +42,8 @@ vendor_names = {
     37: "BIRYANI STREET",
     38: "WRAPIT",
     39: "fries and co",
+    40: "Fresh choice",
+    42: "Aha Panipuri"
 }
 
 # Streamlit application
@@ -56,40 +58,31 @@ if uploaded_file is not None:
 
     # Button to trigger analysis
     if st.button("Analyze"):
-        # Group by vendor_id and sum the restaurant_amount for each vendor
-        restaurant_earnings_per_vendor = df.groupby('vendor_id')['restaurant_amount'].sum()
-        total_earnings_pervendor = df.groupby('vendor_id')['order_amount'].sum()
-        admin_earnings_pervendor = df.groupby('vendor_id')['admin_commission'].sum()
+        # Group by vendor_id and sum the relevant columns for each vendor
+        total_earnings_per_vendor = df.groupby('vendor_id')['order_amount'].sum()
+        total_delivery_fee_per_vendor = df.groupby('vendor_id')['delivery_charge'].sum()
+
+        # Calculate net earnings by subtracting delivery fees from total earnings
+        net_earnings_per_vendor = total_earnings_per_vendor - total_delivery_fee_per_vendor
 
         st.write("___")
-        st.write("RESTAURANT PAYOUTS")
+        st.write("TOTAL SALE VALUE (Excluding Delivery Fees)")
         st.write("___")
-        # Display the results
-        for vendor_id, earnings in restaurant_earnings_per_vendor.items():
-            if vendor_id in vendor_names:
-                vendor_name = vendor_names[vendor_id]
-            else:
-                vendor_name = f"Vendor ID {vendor_id} (Unknown)"
-            st.write(f"{vendor_name}, Earnings: {earnings}")
+        for vendor_id, earnings in total_earnings_per_vendor.items():
+            vendor_name = vendor_names.get(vendor_id, f"Vendor ID {vendor_id} (Unknown)")
+            delivery_fee = total_delivery_fee_per_vendor.get(vendor_id, 0)
+            net_earnings = net_earnings_per_vendor.get(vendor_id, 0)
+            st.write(f"**{vendor_name.upper()}**, Total Earnings: {earnings}, Total Delivery Fee: {delivery_fee}")
+            st.write(f"**Net Earnings (Minus Delivery Fee): {net_earnings}**")
+            st.write("#################")
 
+        # Display the totals at the bottom
         st.write("___")
-        st.write("ZINGO EARNINGS")
+        st.write("TOTALS")
         st.write("___")
-
-        for vendor_id, earnings in admin_earnings_pervendor.items():
-            if vendor_id in vendor_names:
-                vendor_name = vendor_names[vendor_id]
-            else:
-                vendor_name = f"Vendor ID {vendor_id} (Unknown)"
-            st.write(f"{vendor_name}, Earnings: {earnings}")
-
-        st.write("___")
-        st.write("TOTAL SALE VALUE")
-        st.write("___")
-
-        for vendor_id, earnings in total_earnings_pervendor.items():
-            if vendor_id in vendor_names:
-                vendor_name = vendor_names[vendor_id]
-            else:
-                vendor_name = f"Vendor ID {vendor_id} (Unknown)"
-            st.write(f"{vendor_name}, Earnings: {earnings}")
+        total_earnings = total_earnings_per_vendor.sum()
+        total_delivery_fees = total_delivery_fee_per_vendor.sum()
+        total_net_earnings = net_earnings_per_vendor.sum()
+        st.write(f"Total Earnings: {total_earnings}")
+        st.write(f"Total Delivery Fees: {total_delivery_fees}")
+        st.write(f"Total Net Earnings (Minus Delivery Fees): {total_net_earnings}")
