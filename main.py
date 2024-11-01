@@ -43,7 +43,8 @@ vendor_names = {
     38: "WRAPIT",
     39: "fries and co",
     40: "Fresh choice",
-    42: "Aha Panipuri"
+    42: "Aha Panipuri",
+    43: "Zingo Merchandise"
 }
 
 # Streamlit application
